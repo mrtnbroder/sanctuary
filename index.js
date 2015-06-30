@@ -885,23 +885,54 @@
     return either instanceof Left ? l(either.value) : r(either.value);
   });
 
+  var Array_ = function Array_(x) {
+    this.value = x;
+  };
+
+  Array_.prototype.empty = function() {
+    return [];
+  };
+
+  Array_.prototype.toBoolean = function() {
+    return this.value.length > 0;
+  };
+
+  var Boolean_ = function Boolean_(x) {
+    this.value = x;
+  };
+
+  Boolean_.prototype.empty = R.always(false);
+
+  Boolean_.prototype.toBoolean = function() {
+    return this.value.valueOf();
+  };
+
+  var wrap = function(x) {
+    switch (Object.prototype.toString.call(x)) {
+      case '[object Array]':    return new Array_(x);
+      case '[object Boolean]':  return new Boolean_(x);
+      default:                  return x;
+    }
+  };
+
+  var invoke = R.curry(function(method, args, x) {
+    var o = wrap(x);
+    if (!R.is(Function, o[method])) {
+      throw new TypeError(format(
+        '{repr} does not have {} "{}" method',
+        [x, /^[aeiou]/i.test(method) ? 'an' : 'a', method]
+      ));
+    }
+    return o[method].apply(o, args);
+  });
+
   //. ### Control
 
   //  toBoolean :: * -> Boolean
-  var toBoolean = function(x) {
-    if (R.is(Array, x))               return x.length > 0;
-    if (R.is(Boolean, x))             return x;
-    if (R.is(Function, x.toBoolean))  return x.toBoolean();
-    throw new TypeError(R.toString(x) + ' does not have a "toBoolean" method');
-  };
+  var toBoolean = invoke('toBoolean', []);
 
   //  empty :: a -> a
-  var empty = function(x) {
-    if (R.is(Array, x))               return [];
-    if (R.is(Boolean, x))             return false;
-    if (R.is(Function, x.empty))      return x.empty();
-    throw new TypeError(R.toString(x) + ' does not have an "empty" method');
-  };
+  var empty = invoke('empty', []);
 
   //# and :: a -> a -> a
   //.
