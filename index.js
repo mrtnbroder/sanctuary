@@ -195,6 +195,115 @@
     });
   };
 
+  var wrap = function(x) {
+    switch (Object.prototype.toString.call(x)) {
+      case '[object Array]':    return new Array_(x);
+      case '[object Boolean]':  return new Boolean_(x);
+      default:                  return x;
+    }
+  };
+
+  var invoke = R.curry(function(method, args, x) {
+    var o = wrap(x);
+    if (!R.is(Function, o[method])) {
+      throw new TypeError(format(
+        '{repr} does not have {} "{}" method',
+        [x, /^[aeiou]/i.test(method) ? 'an' : 'a', method]
+      ));
+    }
+    return o[method].apply(o, args);
+  });
+
+  //  toBoolean :: * -> Boolean
+  var toBoolean = invoke('toBoolean', []);
+
+  var deriveFromEmpty = function() {
+    return !R.equals(this.value, empty(this.value));
+  };
+
+  //  ### Array type
+
+  //  Array :: Type
+  //
+  //  TK.
+  //
+  //  The Array type satisfies the [Monoid][] and [Monad][] specifications.
+  var Array_ = function Array_(value) {
+    if (!(this instanceof Array_)) {
+      return new Array_(value);
+    }
+    this.value = value;
+  };
+
+  //  Array#empty :: [a] ~> [a]
+  Array_.prototype.empty = function() {
+    return [];
+  };
+
+  //  Array#toBoolean :: [a] ~> Boolean
+  Array_.prototype.toBoolean = deriveFromEmpty;
+
+  //  ### Boolean type
+
+  //  Boolean :: Type
+  //
+  //  TK.
+  //
+  //  The Boolean type satisfies the TK and TK specifications.
+  var Boolean_ = function Boolean_(value) {
+    if (!(this instanceof Boolean_)) {
+      return new Boolean_(value);
+    }
+    this.value = value.valueOf();
+  };
+
+  Boolean_.prototype.empty = R.always(false);
+
+  Boolean_.prototype.toBoolean = deriveFromEmpty;
+
+  //  ### Object type
+
+  //  Object :: Type
+  //
+  //  TK.
+  //
+  //  The Object type satisfies the TK and TK specifications.
+  var Object_ = function Object_(value) {
+    if (!(this instanceof Object_)) {
+      return new Object_(value);
+    }
+    this.value = value;
+  };
+
+  Object_.prototype.empty = function() {
+    return {};
+  };
+
+  Object_.prototype.toBoolean = deriveFromEmpty;
+
+  //  ### String type
+
+  //  String :: Type
+  //
+  //  TK.
+  //
+  //  The String type satisfies the TK and TK specifications.
+  var String_ = function String_(value) {
+    if (!(this instanceof String_)) {
+      return new String_(value);
+    }
+    this.value = value;
+  };
+
+  String_.prototype.empty = R.always('');
+
+  String_.prototype.toBoolean = deriveFromEmpty;
+
+  //. ### TK
+
+  //# empty :: a -> a
+  var empty = S.empty = invoke('empty', []);
+
   //. ### Combinator
 
   //# K :: a -> b -> a
@@ -885,54 +994,7 @@
     return either instanceof Left ? l(either.value) : r(either.value);
   });
 
-  var Array_ = function Array_(x) {
-    this.value = x;
-  };
-
-  Array_.prototype.empty = function() {
-    return [];
-  };
-
-  Array_.prototype.toBoolean = function() {
-    return this.value.length > 0;
-  };
-
-  var Boolean_ = function Boolean_(x) {
-    this.value = x;
-  };
-
-  Boolean_.prototype.empty = R.always(false);
-
-  Boolean_.prototype.toBoolean = function() {
-    return this.value.valueOf();
-  };
-
-  var wrap = function(x) {
-    switch (Object.prototype.toString.call(x)) {
-      case '[object Array]':    return new Array_(x);
-      case '[object Boolean]':  return new Boolean_(x);
-      default:                  return x;
-    }
-  };
-
-  var invoke = R.curry(function(method, args, x) {
-    var o = wrap(x);
-    if (!R.is(Function, o[method])) {
-      throw new TypeError(format(
-        '{repr} does not have {} "{}" method',
-        [x, /^[aeiou]/i.test(method) ? 'an' : 'a', method]
-      ));
-    }
-    return o[method].apply(o, args);
-  });
-
   //. ### Control
-
-  //  toBoolean :: * -> Boolean
-  var toBoolean = invoke('toBoolean', []);
-
-  //  empty :: a -> a
-  var empty = invoke('empty', []);
 
   //# and :: a -> a -> a
   //.
