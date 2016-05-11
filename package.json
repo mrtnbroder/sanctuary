@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "ramda": "0.21.x",
-    "sanctuary-def": "0.6.x"
+    "sanctuary-def": "sanctuary-js/sanctuary-def#dc-sanctuary-type-classes",
+    "sanctuary-type-classes": "sanctuary-js/sanctuary-type-classes#dc-everything"
   },
   "devDependencies": {
     "doctest": "0.10.x",

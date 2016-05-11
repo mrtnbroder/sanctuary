@@ -25,7 +25,7 @@
 //. Sanctuary gives us a fighting chance of avoiding such errors. We might
 //. write:
 //.
-//.     R.map(S.toUpper, S.head(words))
+//.     S.map(S.toUpper, S.head(words))
 //.
 //. Sanctuary is designed to work in Node.js and in ES5-compatible browsers.
 //.
@@ -37,12 +37,6 @@
 //. a function's type. `Math.abs`, for example, has type `Number -> Number`.
 //. That is, it takes an argument of type `Number` and returns a value of
 //. type `Number`.
-//.
-//. [`R.map`][R.map] has type `(a -> b) -> Array a -> Array b`. That is,
-//. it takes an argument of type `a -> b` and returns a value of type
-//. `Array a -> Array b`. `a` and `b` are type variables: applying `R.map`
-//. to a value of type `String -> Number` will result in a value of type
-//. `Array String -> Array Number`.
 //.
 //. Sanctuary embraces types. JavaScript doesn't support algebraic data types,
 //. but these can be simulated by providing a group of data constructors which
@@ -149,14 +143,16 @@
 
   /* istanbul ignore else */
   if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = f(require('ramda'), require('sanctuary-def'));
+    module.exports = f(require('ramda'),
+                       require('sanctuary-type-classes'),
+                       require('sanctuary-def'));
   } else if (typeof define === 'function' && define.amd != null) {
-    define(['ramda', 'sanctuary-def'], f);
+    define(['ramda', 'sanctuary-type-classes', 'sanctuary-def'], f);
   } else {
-    self.sanctuary = f(self.R, self.sanctuaryDef);
+    self.sanctuary = f(self.R, self.sanctuaryTypeClasses, self.sanctuaryDef);
   }
 
-}(function(R, $) {
+}(function(R, λ, $) {
 
   'use strict';
 
@@ -205,50 +201,16 @@
   var negativeZero = R.either(R.equals(-0), R.equals(new Number(-0)));
 
   //  Accessible :: TypeClass
-  var Accessible = $.TypeClass(
+  var Accessible = λ.TypeClass(
     'sanctuary/Accessible',
+    [],
     function(x) { return x != null; }
   );
 
-  //  Applicative :: TypeClass
-  var Applicative = $.TypeClass(
-    'sanctuary/Applicative',
-    function(x) {
-      return _type(x) === 'Array' ||
-             Apply._test(x) && (hasMethod('of')(x) ||
-                                hasMethod('of')(x.constructor));
-    }
-  );
-
-  //  Apply :: TypeClass
-  var Apply = $.TypeClass(
-    'sanctuary/Apply',
-    function(x) {
-      return R.contains(_type(x), ['Array', 'Function']) ||
-             Functor._test(x) && hasMethod('ap')(x);
-    }
-  );
-
-  //  Foldable :: TypeClass
-  var Foldable = $.TypeClass(
-    'sanctuary/Foldable',
-    function(x) {
-      return _type(x) === 'Array' || hasMethod('reduce')(x);
-    }
-  );
-
-  //  Functor :: TypeClass
-  var Functor = $.TypeClass(
-    'sanctuary/Functor',
-    function(x) {
-      return R.contains(_type(x), ['Array', 'Function']) ||
-             hasMethod('map')(x);
-    }
-  );
-
   //  Monoid :: TypeClass
-  var Monoid = $.TypeClass(
+  var Monoid = λ.TypeClass(
     'sanctuary/Monoid',
+    [],
     function(x) {
       return R.contains(_type(x), ['Array', 'Boolean', 'Object', 'String']) ||
              hasMethod('empty')(x);
@@ -256,15 +218,10 @@
   );
 
   //  Ord :: TypeClass
-  var Ord = $.TypeClass(
+  var Ord = λ.TypeClass(
     'sanctuary/Ord',
+    [],
     R.anyPass([$.String._test, $.ValidDate._test, $.ValidNumber._test])
-  );
-
-  //  Semigroup :: TypeClass
-  var Semigroup = $.TypeClass(
-    'sanctuary/Semigroup',
-    hasMethod('concat')
   );
 
   var a = $.TypeVariable('a');
@@ -490,6 +447,195 @@
         );
       });
 
+  //. ### Fantasy Land
+
+  //# concat :: Semigroup a => a -> a -> a
+  //.
+  //. Concatenates two (homogeneous) arrays, two strings, or two values of any
+  //. other type which satisfies the [Semigroup][] specification.
+  //.
+  //. ```javascript
+  //. > S.concat([1, 2, 3], [4, 5, 6])
+  //. [1, 2, 3, 4, 5, 6]
+  //.
+  //. > S.concat('foo', 'bar')
+  //. 'foobar'
+  //.
+  //. > S.concat(S.Just('foo'), S.Just('bar'))
+  //. S.Just('foobar')
+  //. ```
+  var concat = S.concat =
+  def('concat',
+      {a: [λ.Semigroup]},
+      [a, a, a],
+      λ.concat);
+
+  //# empty :: Monoid a => a -> a
+  //.
+  //. TK.
+  //.
+  //. ```javascript
+  //. > S.empty([1, 2, 3])
+  //. []
+  //.
+  //. > S.empty({x: 1, y: 2})
+  //. {}
+  //.
+  //. > S.empty('abc')
+  //. ''
+  //.
+  //. > S.empty(S.Just(42))
+  //. Nothing
+  //. ```
+  S.empty =
+  def('empty',
+      {a: [λ.Monoid]},
+      [a, a],
+      λ.empty);
+
+  //# map :: Functor f => (a -> b) -> f a -> f b
+  //.
+  //. TK.
+  //.
+  //. ```javascript
+  //. > S.map(S.inc, [1, 2, 3])
+  //. [2, 3, 4]
+  //.
+  //. > S.map(S.inc, {x: 1, y: 2})
+  //. {x: 2, y: 3}
+  //.
+  //. > S.map(S.inc, R.length)([1, 2, 3])
+  //. 4
+  //.
+  //. > S.map(S.inc, S.Just(42))
+  //. Just(43)
+  //.
+  //. > S.map(S.inc, S.Right(42))
+  //. Right(43)
+  //. ```
+  var map = S.map =
+  def('map',
+      {a: [λ.Functor], b: [λ.Functor]},
+      [$.Function, a, b],
+      λ.map);
+
+  //# reduce :: Foldable f => (a -> b -> a) -> a -> f b -> a
+  //.
+  //. Takes a curried binary function, an initial value, and a [Foldable][],
+  //. and applies the function to the initial value and the Foldable's first
+  //. value, then applies the function to the result of the previous
+  //. application and the Foldable's second value. Repeats this process
+  //. until each of the Foldable's values has been used. Returns the initial
+  //. value if the Foldable is empty; the result of the final application
+  //. otherwise.
+  //.
+  //. See also [`reduce_`](#reduce_).
+  //.
+  //. ```javascript
+  //. > S.reduce(S.add, 0, [1, 2, 3, 4, 5])
+  //. 15
+  //.
+  //. > S.reduce(xs => x => [x].concat(xs), [], [1, 2, 3, 4, 5])
+  //. [5, 4, 3, 2, 1]
+  //. ```
+  var reduce = S.reduce =
+  def('reduce',
+      {b: [λ.Foldable]},
+      [$.Function, a, b, a],
+      function(f_, initial, foldable) {
+        var f = function(a, b) {
+          return f_(a)(b);
+        };
+        return reduce_(f, initial, foldable);
+      });
+
+  //# reduce_ :: Foldable f => ((a, b) -> a) -> a -> f b -> a
+  //.
+  //. Version of [`reduce`](#reduce) accepting uncurried functions.
+  var reduce_ = S.reduce_ =
+  def('reduce_',
+      {b: [λ.Foldable]},
+      [$.Function, a, b, a],
+      λ.reduce);
+
+  //# sequence :: (Applicative f, Traversable t) => (a -> f a) -> t (f a) -> f (t a)
+  //.
+  //. TK.
+  //.
+  //. ```javascript
+  //. > S.sequence(S.Maybe.of, [S.Just(1), S.Just(2), S.Just(3)])
+  //. Just([1, 2, 3])
+  //.
+  //. > S.sequence(S.Maybe.of, [S.Just(1), S.Just(2), S.Nothing])
+  //. Nothing
+  //.
+  //. > S.sequence(R.of, S.Just([1, 2, 3]))
+  //. [Just(1), Just(2), Just(3)]
+  //.
+  //. > S.sequence(R.of, S.Nothing)
+  //. [Nothing]
+  //. ```
+  S.sequence =
+  def('sequence',
+      {a: [λ.Traversable], b: [λ.Applicative]},
+      [$.Function, a, b],
+      λ.sequence);
+
+  //# ap :: Apply f => f (a -> b) -> f a -> f b
+  //.
+  //. TK.
+  //.
+  //. ```javascript
+  //. > S.ap([Math.sqrt, S.inc], [1, 4, 9, 16, 25])
+  //. [1, 2, 3, 4, 5, 2, 5, 10, 17, 26]
+  //.
+  //. > S.ap(x => n => R.repeat(x, n), R.length)('abc')
+  //. ['abc', 'abc', 'abc']
+  //.
+  //. > S.ap(S.Just(S.inc), S.Just(42))
+  //. S.Just(43)
+  //. ```
+  var ap = S.ap =
+  def('ap',
+      {a: [λ.Apply], b: [λ.Apply], f: [λ.Apply]},
+      [a, b, c],
+      λ.ap);
+
+  //# chain :: Chain f => (a -> f b) -> f a -> f b
+  //.
+  //. TK.
+  //.
+  //. ```javascript
+  //. > S.chain(x => [x, x], [1, 2, 3])
+  //. [1, 1, 2, 2, 3, 3]
+  //.
+  //. > S.chain(S.parseInt(10), S.Just('42'))
+  //. Just(42)
+  //. ```
+  var chain = S.chain =
+  def('chain',
+      {a: [λ.Chain], b: [λ.Chain]},
+      [$.Function, a, b],
+      λ.chain);
+
+  //# extend :: Extend e => (e a -> a) -> e a -> e a
+  //.
+  //. TK.
+  S.extend =
+  def('extend',
+      {a: [λ.Extend], b: [λ.Extend]},
+      [a, b, b],
+      λ.extend);
+
+  //# extract :: Extend e => e a -> a
+  //.
+  //. TK.
+  S.extract =
+  def('extract',
+      {a: [λ.Extend]},
+      [a, b],
+      λ.extract);
+
   //. ### Combinator
 
   //# I :: a -> a
@@ -516,7 +662,7 @@
   //. > S.K('foo', 'bar')
   //. 'foo'
   //.
-  //. > R.map(S.K(42), R.range(0, 5))
+  //. > S.map(S.K(42), R.range(0, 5))
   //. [42, 42, 42, 42, 42]
   //. ```
   S.K =
@@ -535,7 +681,7 @@
   //. > S.A(S.inc, 42)
   //. 43
   //.
-  //. > R.map(S.A(R.__, 100), [S.inc, Math.sqrt])
+  //. > S.map(S.A(R.__, 100), [S.inc, Math.sqrt])
   //. [101, 10]
   //. ```
   S.A =
@@ -633,7 +779,7 @@
   //. See also [`C`](#C).
   //.
   //. ```javascript
-  //. > R.map(S.flip(Math.pow)(2), [1, 2, 3, 4, 5])
+  //. > S.map(S.flip(Math.pow)(2), [1, 2, 3, 4, 5])
   //. [1, 4, 9, 16, 25]
   //. ```
   S.flip =
@@ -655,9 +801,9 @@
   //. ```
   S.lift =
   def('lift',
-      {a: [Functor], b: [Functor]},
+      {a: [λ.Functor], b: [λ.Functor]},
       [$.Function, a, b],
-      R.map);
+      map);
 
   //# lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
   //.
@@ -679,9 +825,9 @@
   //. ```
   S.lift2 =
   def('lift2',
-      {a: [Apply], b: [Apply], c: [Apply]},
+      {a: [λ.Apply], b: [λ.Apply], c: [λ.Apply]},
       [$.Function, a, b, c],
-      function(f, x, y) { return R.ap(R.map(f, x), y); });
+      function(f, x, y) { return ap(map(f, x), y); });
 
   //# lift3 :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
   //.
@@ -697,9 +843,9 @@
   //. ```
   S.lift3 =
   def('lift3',
-      {a: [Apply], b: [Apply], c: [Apply], d: [Apply]},
+      {a: [λ.Apply], b: [λ.Apply], c: [λ.Apply], d: [λ.Apply]},
       [$.Function, a, b, c, d],
-      function(f, x, y, z) { return R.ap(R.ap(R.map(f, x), y), z); });
+      function(f, x, y, z) { return ap(ap(map(f, x), y), z); });
 
   //. ### Composition
 
@@ -776,7 +922,7 @@
       {},
       [$.Array($.Function), $.Function],
       function(fs) {
-        var n = 1 + sum(R.map(R.length, fs)) - fs.length;
+        var n = 1 + sum(map(R.length, fs)) - fs.length;
         return R.curryN(n, function() {
           var args = Array.prototype.slice.call(arguments);
           for (var idx = 0; idx < fs.length; idx += 1) {
@@ -940,7 +1086,7 @@
   //. ```
   Maybe.prototype.concat =
   method('Maybe#concat',
-         {a: [Semigroup]},
+         {a: [λ.Semigroup]},
          [$Maybe(a), $Maybe(a), $Maybe(a)],
          function(mx, my) {
            return mx.isNothing ? my :
@@ -1112,10 +1258,10 @@
   //. ```
   Maybe.prototype.sequence =
   method('Maybe#sequence',
-         {a: [Applicative], b: [Applicative]},
+         {a: [λ.Applicative], b: [λ.Applicative]},
          [$Maybe(a), $.Function, b],
          function(maybe, of) {
-           return maybe.isJust ? R.map(Just, maybe.value) : of(maybe);
+           return maybe.isJust ? map(Just, maybe.value) : of(maybe);
          });
 
   //# Maybe#toBoolean :: Maybe a ~> Boolean
@@ -1317,7 +1463,7 @@
   def('justs',
       {},
       [$.Array($Maybe(a)), $.Array(a)],
-      R.chain(maybe([], R.of)));
+      chain(maybe([], R.of)));
 
   //# mapMaybe :: (a -> Maybe b) -> Array a -> Array b
   //.
@@ -1337,7 +1483,7 @@
   def('mapMaybe',
       {},
       [$.Function, $.Array(a), $.Array(b)],
-      function(f, xs) { return justs(R.map(f, xs)); });
+      function(f, xs) { return justs(map(f, xs)); });
 
   //# encase :: (a -> b) -> a -> Maybe b
   //.
@@ -1604,7 +1750,7 @@
   //. ```
   Either.prototype.concat =
   method('Either#concat',
-         {a: [Semigroup], b: [Semigroup]},
+         {a: [λ.Semigroup], b: [λ.Semigroup]},
          [$Either(a, b), $Either(a, b), $Either(a, b)],
          function(ex, ey) {
            return ex.isLeft && ey.isLeft ? Left(ex.value.concat(ey.value)) :
@@ -1742,10 +1888,10 @@
   //. ```
   Either.prototype.sequence =
   method('Either#sequence',
-         {b: [Applicative], c: [Applicative]},
+         {b: [λ.Applicative], c: [λ.Applicative]},
          [$Either(a, b), $.Function, c],
          function(either, of) {
-           return either.isRight ? R.map(Right, either.value) : of(either);
+           return either.isRight ? map(Right, either.value) : of(either);
          });
 
   //# Either#toBoolean :: Either a b ~> Boolean
@@ -1922,7 +2068,7 @@
   def('lefts',
       {},
       [$.Array($Either(a, b)), $.Array(a)],
-      R.chain(function(either) {
+      chain(function(either) {
         return either.isLeft ? [either.value] : [];
       }));
 
@@ -1941,7 +2087,7 @@
   def('rights',
       {},
       [$.Array($Either(a, b)), $.Array(b)],
-      R.chain(function(either) {
+      chain(function(either) {
         return either.isRight ? [either.value] : [];
       }));
 
@@ -2072,8 +2218,9 @@
   //. ### Alternative
 
   //  Alternative :: TypeClass
-  var Alternative = $.TypeClass(
+  var Alternative = λ.TypeClass(
     'Alternative',
+    [],
     function(x) {
       return R.contains(R.type(x), ['Array', 'Boolean']) ||
              hasMethod('toBoolean')(x);
@@ -2262,27 +2409,6 @@
   //.
   //. `[a]` is the notation used to represent a List of values of type `a`.
 
-  //# concat :: Semigroup a => a -> a -> a
-  //.
-  //. Concatenates two (homogeneous) arrays, two strings, or two values of any
-  //. other type which satisfies the [Semigroup][] specification.
-  //.
-  //. ```javascript
-  //. > S.concat([1, 2, 3], [4, 5, 6])
-  //. [1, 2, 3, 4, 5, 6]
-  //.
-  //. > S.concat('foo', 'bar')
-  //. 'foobar'
-  //.
-  //. > S.concat(S.Just('foo'), S.Just('bar'))
-  //. S.Just('foobar')
-  //. ```
-  var concat = S.concat =
-  def('concat',
-      {a: [Semigroup]},
-      [a, a, a],
-      function(x, y) { return x.concat(y); });
-
   //# slice :: Integer -> Integer -> [a] -> Maybe [a]
   //.
   //. Returns Just a list containing the elements from the supplied list
@@ -2346,7 +2472,7 @@
       {},
       [$.Integer, List(a), $Maybe(a)],
       function(n, xs) {
-        return R.map(R.head, slice(n, n === -1 ? -0 : n + 1, xs));
+        return map(R.head, slice(n, n === -1 ? -0 : n + 1, xs));
       });
 
   //# head :: [a] -> Maybe a
@@ -2546,8 +2672,9 @@
       });
 
   //  ArrayLike :: TypeClass
-  var ArrayLike = $.TypeClass(
+  var ArrayLike = λ.TypeClass(
     'ArrayLike',
+    [],
     function(x) {
       return x != null &&
              typeof x !== 'function' &&
@@ -2693,56 +2820,7 @@
   def('pluck',
       {a: [Accessible]},
       [TypeRep, $.String, $.Array(a), $.Array($Maybe(b))],
-      function(type, key, xs) { return R.map(get(type, key), xs); });
-
-  //# reduce :: Foldable f => (a -> b -> a) -> a -> f b -> a
-  //.
-  //. Takes a curried binary function, an initial value, and a [Foldable][],
-  //. and applies the function to the initial value and the Foldable's first
-  //. value, then applies the function to the result of the previous
-  //. application and the Foldable's second value. Repeats this process
-  //. until each of the Foldable's values has been used. Returns the initial
-  //. value if the Foldable is empty; the result of the final application
-  //. otherwise.
-  //.
-  //. See also [`reduce_`](#reduce_).
-  //.
-  //. ```javascript
-  //. > S.reduce(S.add, 0, [1, 2, 3, 4, 5])
-  //. 15
-  //.
-  //. > S.reduce(xs => x => [x].concat(xs), [], [1, 2, 3, 4, 5])
-  //. [5, 4, 3, 2, 1]
-  //. ```
-  var reduce = S.reduce =
-  def('reduce',
-      {b: [Foldable]},
-      [$.Function, a, b, a],
-      function(f_, initial, foldable) {
-        var f = function(a, b) {
-          return f_(a)(b);
-        };
-        return reduce_(f, initial, foldable);
-      });
-
-  //# reduce_ :: Foldable f => ((a, b) -> a) -> a -> f b -> a
-  //.
-  //. Version of [`reduce`](#reduce) accepting uncurried functions.
-  var reduce_ = S.reduce_ =
-  def('reduce_',
-      {b: [Foldable]},
-      [$.Function, a, b, a],
-      function(f, initial, foldable) {
-        if (_type(foldable) === 'Array') {
-          var acc = initial;
-          for (var idx = 0; idx < foldable.length; idx += 1) {
-            acc = f(acc, foldable[idx]);
-          }
-          return acc;
-        } else {
-          return foldable.reduce(f, initial);
-        }
-      });
+      function(type, key, xs) { return map(get(type, key), xs); });
 
   //# unfoldr :: (b -> Maybe (Pair a b)) -> b -> Array a
   //.
@@ -2974,7 +3052,7 @@
   //. ```
   var sum = S.sum =
   def('sum',
-      {f: [Foldable]},
+      {f: [λ.Foldable]},
       [f, $.FiniteNumber],
       reduce(function(a) { return function(b) { return a + b; }; }, 0));
 
@@ -3053,7 +3131,7 @@
   //. ```
   S.product =
   def('product',
-      {f: [Foldable]},
+      {f: [λ.Foldable]},
       [f, $.FiniteNumber],
       reduce(function(a) { return function(b) { return a * b; }; }, 1));
 
@@ -3091,7 +3169,7 @@
   //. ```
   S.mean =
   def('mean',
-      {f: [Foldable]},
+      {f: [λ.Foldable]},
       [f, $Maybe($.FiniteNumber)],
       function(foldable) {
         var result = reduce_(
@@ -3268,7 +3346,7 @@
   def('parseFloat',
       {},
       [$.String, $Maybe($.Number)],
-      R.pipe(Just, R.filter(validFloatRepr), R.map(parseFloat)));
+      R.pipe(Just, R.filter(validFloatRepr), map(parseFloat)));
 
   //# parseInt :: Integer -> String -> Maybe Integer
   //.
@@ -3310,7 +3388,7 @@
                           R.all(R.pipe(toUpper,
                                        R.indexOf(_, charset),
                                        R.gte(_, 0))))),
-          R.map(R.partialRight(parseInt, [radix])),
+          map(R.partialRight(parseInt, [radix])),
           R.filter($.Integer._test)
         )(s);
       });
@@ -3416,7 +3494,7 @@
       [$.RegExp, $.String, $Maybe($.Array($Maybe($.String)))],
       function(pattern, s) {
         var match = s.match(pattern);
-        return match == null ? Nothing : Just(R.map(toMaybe, match));
+        return match == null ? Nothing : Just(λ.map(toMaybe, match));
       });
 
   //. ### String
@@ -3534,7 +3612,7 @@
   def('unlines',
       {},
       [$.Array($.String), $.String],
-      compose(R.join(''), R.map(concat(_, '\n'))));
+      compose(R.join(''), map(concat(_, '\n'))));
 
   return S;
 
@@ -3555,7 +3633,6 @@
 //. [Monoid]:         https://github.com/fantasyland/fantasy-land#monoid
 //. [Nullable]:       https://github.com/sanctuary-js/sanctuary-def#nullable
 //. [R.equals]:       http://ramdajs.com/docs/#equals
-//. [R.map]:          http://ramdajs.com/docs/#map
 //. [R.type]:         http://ramdajs.com/docs/#type
 //. [Ramda]:          http://ramdajs.com/
 //. [RegExp]:         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
