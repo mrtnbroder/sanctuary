@@ -22,13 +22,13 @@ describe('encase3', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'encase3 :: Function -> a -> b -> c -> Maybe d\n' +
-                   '           ^^^^^^^^\n' +
-                   '              1\n' +
+                   'encase3 :: (a -> b -> c -> d) -> a -> b -> c -> Maybe d\n' +
+                   '           ^^^^^^^^^^^^^^^^^^\n' +
+                   '                   1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b -> c -> d’.\n'));
   });
 
   it('returns a Just on success', function() {

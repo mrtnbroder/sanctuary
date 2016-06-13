@@ -21,55 +21,55 @@ describe('either', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '          ^^^^^^^^\n' +
                    '             1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> c’.\n'));
 
     throws(function() { S.either(R.__, square)([1, 2, 3]); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '          ^^^^^^^^\n' +
                    '             1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> c’.\n'));
 
     throws(function() { S.either(R.length, [1, 2, 3]); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '                      ^^^^^^^^\n' +
                    '                         1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘b -> c’.\n'));
 
     throws(function() { S.either(R.length)([1, 2, 3]); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '                      ^^^^^^^^\n' +
                    '                         1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘b -> c’.\n'));
 
     throws(function() { S.either(R.length, square, [1, 2, 3]); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '                                  ^^^^^^^^^^\n' +
                    '                                      1\n' +
                    '\n' +
@@ -81,7 +81,7 @@ describe('either', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'either :: Function -> Function -> Either a b -> c\n' +
+                   'either :: (a -> c) -> (b -> c) -> Either a b -> c\n' +
                    '                                  ^^^^^^^^^^\n' +
                    '                                      1\n' +
                    '\n' +

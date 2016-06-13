@@ -21,25 +21,25 @@ describe('encaseEither', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'encaseEither :: Function -> Function -> a -> Either l r\n' +
-                   '                ^^^^^^^^\n' +
-                   '                   1\n' +
+                   'encaseEither :: (Error -> l) -> (a -> r) -> a -> Either l r\n' +
+                   '                ^^^^^^^^^^^^\n' +
+                   '                     1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘Error -> l’.\n'));
 
     throws(function() { S.encaseEither(S.I, null); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'encaseEither :: Function -> Function -> a -> Either l r\n' +
-                   '                            ^^^^^^^^\n' +
-                   '                               1\n' +
+                   'encaseEither :: (Error -> l) -> (a -> r) -> a -> Either l r\n' +
+                   '                                ^^^^^^^^\n' +
+                   '                                   1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> r’.\n'));
   });
 
   it('returns a Right on success', function() {

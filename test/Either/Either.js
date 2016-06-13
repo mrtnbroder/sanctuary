@@ -5,28 +5,12 @@ var throws = require('assert').throws;
 var jsc = require('jsverify');
 var R = require('ramda');
 
+var Compose = require('../types/Compose');
+var Identity = require('../types/Identity');
+var env = require('../types/env');
 var errorEq = require('../utils').errorEq;
-var S = require('../..');
+var S = require('../..').create({checkTypes: true, env: env});
 
-
-//  Identity :: a -> Identity a
-var Identity = function Identity(x) {
-  return {
-    of: Identity,
-    map: function(fn) {
-      return Identity(fn(x));
-    },
-    ap: function(y) {
-      return Identity(x(y));
-    },
-    equals: function(other) {
-      return R.equals(x, other.value);
-    },
-    value: x
-  };
-};
-
-Identity.of = Identity;
 
 //  IdentityArb :: Arbitrary a -> Arbitrary (Identity a)
 var IdentityArb = function(arb) {
@@ -51,31 +35,6 @@ var LeftArb = function(arb) {
 //  RightArb :: Arbitrary a -> Arbitrary (Either b a)
 var RightArb = function(arb) {
   return arb.smap(S.Right, function(e) { return e.value; }, R.toString);
-};
-
-//  Compose :: Apply f, Apply g
-//          => { of: b -> f b } -> { of: c -> g c }
-//          -> f (g a) -> Compose f g a
-var Compose = function(F, G) {
-  var _Compose = function _Compose(x) {
-    return {
-      constructor: _Compose,
-      map: function(f) {
-        return _Compose(R.map(R.map(f), x));
-      },
-      ap: function(y) {
-        return _Compose(R.ap(R.map(R.ap, x), y.value));
-      },
-      equals: function(other) {
-        return R.equals(x, other.value);
-      },
-      value: x
-    };
-  };
-  _Compose.of = function(x) {
-    return _Compose(F.of(G.of(x)));
-  };
-  return _Compose;
 };
 
 describe('Either', function() {
@@ -105,7 +64,7 @@ describe('Either', function() {
 
     it('satisfies composition', function() {
       jsc.assert(jsc.forall(EitherArb(jsc.string, IdentityArb(EitherArb(jsc.string, jsc.integer))), function(u) {
-        var C = Compose(Identity, S.Either);
+        var C = Compose(Identity)(S.Either);
         var lhs = u.map(C).sequence(C.of);
         var rhs = C(u.sequence(Identity.of).map(function(x) {
           return x.sequence(S.Either.of);

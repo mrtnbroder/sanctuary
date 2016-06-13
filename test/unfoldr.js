@@ -19,13 +19,13 @@ describe('unfoldr', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'unfoldr :: Function -> b -> Array a\n' +
-                   '           ^^^^^^^^\n' +
-                   '              1\n' +
+                   'unfoldr :: (b -> Maybe (Pair a b)) -> b -> Array a\n' +
+                   '           ^^^^^^^^^^^^^^^^^^^^^^^\n' +
+                   '                      1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘b -> Maybe (Pair a b)’.\n'));
   });
 
   it('correctly unfolds a value into a list', function() {

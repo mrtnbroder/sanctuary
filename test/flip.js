@@ -20,13 +20,13 @@ describe('flip', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'flip :: Function -> b -> a -> c\n' +
-                   '        ^^^^^^^^\n' +
-                   '           1\n' +
+                   'flip :: ((a, b) -> c) -> b -> a -> c\n' +
+                   '        ^^^^^^^^^^^^^\n' +
+                   '              1\n' +
                    '\n' +
                    '1)  "wrong" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘(a, b) -> c’.\n'));
   });
 
   it("flips a function's argument order", function() {

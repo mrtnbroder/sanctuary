@@ -19,9 +19,9 @@ describe('sum', function() {
            errorEq(TypeError,
                    'Type-class constraint violation\n' +
                    '\n' +
-                   'sum :: Foldable f => f -> FiniteNumber\n' +
-                   '       ^^^^^^^^^^    ^\n' +
-                   '                     1\n' +
+                   'sum :: Foldable f => f FiniteNumber -> FiniteNumber\n' +
+                   '       ^^^^^^^^^^    ^^^^^^^^^^^^^^\n' +
+                   '                           1\n' +
                    '\n' +
                    '1)  "xxx" :: String\n' +
                    '\n' +
@@ -31,9 +31,9 @@ describe('sum', function() {
            errorEq(TypeError,
                    'Type-variable constraint violation\n' +
                    '\n' +
-                   'sum :: Foldable f => f -> FiniteNumber\n' +
-                   '                     ^\n' +
-                   '                     1\n' +
+                   'sum :: Foldable f => f FiniteNumber -> FiniteNumber\n' +
+                   '                     ^^^^^^^^^^^^^^\n' +
+                   '                           1\n' +
                    '\n' +
                    '1)  [1, 2, "xxx"] :: Array ???\n' +
                    '\n' +
@@ -43,9 +43,9 @@ describe('sum', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'sum :: Foldable f => f -> FiniteNumber\n' +
-                   '                          ^^^^^^^^^^^^\n' +
-                   '                               1\n' +
+                   'sum :: Foldable f => f FiniteNumber -> FiniteNumber\n' +
+                   '                       ^^^^^^^^^^^^\n' +
+                   '                            1\n' +
                    '\n' +
                    '1)  Infinity :: Number, ValidNumber\n' +
                    '\n' +
@@ -55,9 +55,9 @@ describe('sum', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'sum :: Foldable f => f -> FiniteNumber\n' +
-                   '                          ^^^^^^^^^^^^\n' +
-                   '                               1\n' +
+                   'sum :: Foldable f => f FiniteNumber -> FiniteNumber\n' +
+                   '                       ^^^^^^^^^^^^\n' +
+                   '                            1\n' +
                    '\n' +
                    '1)  -Infinity :: Number, ValidNumber\n' +
                    '\n' +

@@ -25,13 +25,13 @@ describe('reduce', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'reduce :: Foldable b => Function -> a -> b -> a\n' +
-                   '                        ^^^^^^^^\n' +
-                   '                           1\n' +
+                   'reduce :: Foldable f => (a -> b -> a) -> a -> f b -> a\n' +
+                   '                        ^^^^^^^^^^^^^\n' +
+                   '                              1\n' +
                    '\n' +
                    '1)  "xxx" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b -> a’.\n'));
   });
 
   it('folds over lists with the supplied accumulator', function() {

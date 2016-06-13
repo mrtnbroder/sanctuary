@@ -21,25 +21,25 @@ describe('encaseEither3', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'encaseEither3 :: Function -> Function -> a -> b -> c -> Either l r\n' +
-                   '                 ^^^^^^^^\n' +
-                   '                    1\n' +
+                   'encaseEither3 :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r\n' +
+                   '                 ^^^^^^^^^^^^\n' +
+                   '                      1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘Error -> l’.\n'));
 
     throws(function() { S.encaseEither3(S.I, null); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'encaseEither3 :: Function -> Function -> a -> b -> c -> Either l r\n' +
-                   '                             ^^^^^^^^\n' +
-                   '                                1\n' +
+                   'encaseEither3 :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r\n' +
+                   '                                 ^^^^^^^^^^^^^^^^^^\n' +
+                   '                                         1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b -> c -> r’.\n'));
   });
 
   it('returns a Right on success', function() {

@@ -30,7 +30,7 @@ describe('Right', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'Either#ap :: Either a Function -> Either a b -> Either a c\n' +
+                   'Either#ap :: Either a (b -> c) -> Either a b -> Either a c\n' +
                    '                                  ^^^^^^^^^^\n' +
                    '                                      1\n' +
                    '\n' +
@@ -47,13 +47,13 @@ describe('Right', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'Either#chain :: Either a b -> Function -> Either a c\n' +
-                   '                              ^^^^^^^^\n' +
-                   '                                 1\n' +
+                   'Either#chain :: Either a b -> (b -> Either a c) -> Either a c\n' +
+                   '                              ^^^^^^^^^^^^^^^^^\n' +
+                   '                                      1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘b -> Either a c’.\n'));
   });
 
   it('provides a "concat" method', function() {
@@ -141,13 +141,13 @@ describe('Right', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'Either#extend :: Either a b -> Function -> Either a b\n' +
-                   '                               ^^^^^^^^\n' +
-                   '                                  1\n' +
+                   'Either#extend :: Either a b -> (Either a b -> b) -> Either a b\n' +
+                   '                               ^^^^^^^^^^^^^^^^^\n' +
+                   '                                       1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘Either a b -> b’.\n'));
   });
 
   it('provides a "map" method', function() {
@@ -158,31 +158,30 @@ describe('Right', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'Either#map :: Either a b -> Function -> Either a c\n' +
+                   'Either#map :: Either a b -> (b -> c) -> Either a c\n' +
                    '                            ^^^^^^^^\n' +
                    '                               1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘b -> c’.\n'));
   });
 
   it('provides a "reduce" method', function() {
     eq(S.Right(5).reduce.length, 2);
-    eq(S.Right(5).reduce(function(xs, x) { return xs.concat([x]); }, [42]),
-       [42, 5]);
+    eq(S.Right(5).reduce(function(x, y) { return x - y; }, 42), 37);
 
     throws(function() { S.Right().reduce(null, null); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'Either#reduce :: Either a b -> Function -> c -> c\n' +
-                   '                               ^^^^^^^^\n' +
-                   '                                  1\n' +
+                   'Either#reduce :: Either a b -> ((c, b) -> c) -> c -> c\n' +
+                   '                               ^^^^^^^^^^^^^\n' +
+                   '                                     1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘(c, b) -> c’.\n'));
   });
 
   it('provides a "sequence" method', function() {

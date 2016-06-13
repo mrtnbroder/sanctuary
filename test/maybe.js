@@ -23,19 +23,19 @@ describe('maybe', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'maybe :: b -> Function -> Maybe a -> b\n' +
+                   'maybe :: b -> (a -> b) -> Maybe a -> b\n' +
                    '              ^^^^^^^^\n' +
                    '                 1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b’.\n'));
 
     throws(function() { S.maybe(0, R.length, [1, 2, 3]); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'maybe :: b -> Function -> Maybe a -> b\n' +
+                   'maybe :: b -> (a -> b) -> Maybe a -> b\n' +
                    '                          ^^^^^^^\n' +
                    '                             1\n' +
                    '\n' +

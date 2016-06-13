@@ -20,21 +20,21 @@ describe('mapMaybe', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'mapMaybe :: Function -> Array a -> Array b\n' +
-                   '            ^^^^^^^^\n' +
-                   '               1\n' +
+                   'mapMaybe :: (a -> Maybe b) -> Array a -> Array b\n' +
+                   '            ^^^^^^^^^^^^^^\n' +
+                   '                  1\n' +
                    '\n' +
                    '1)  [1, 2, 3] :: Array Number, Array FiniteNumber, Array NonZeroFiniteNumber, Array Integer, Array ValidNumber\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> Maybe b’.\n'));
 
     throws(function() { S.mapMaybe(S.head, null); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'mapMaybe :: Function -> Array a -> Array b\n' +
-                   '                        ^^^^^^^\n' +
-                   '                           1\n' +
+                   'mapMaybe :: (a -> Maybe b) -> Array a -> Array b\n' +
+                   '                              ^^^^^^^\n' +
+                   '                                 1\n' +
                    '\n' +
                    '1)  null :: Null\n' +
                    '\n' +

@@ -21,37 +21,37 @@ describe('ifElse', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'ifElse :: Function -> Function -> Function -> a -> b\n' +
-                   '          ^^^^^^^^\n' +
-                   '             1\n' +
+                   'ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b\n' +
+                   '          ^^^^^^^^^^^^^^\n' +
+                   '                1\n' +
                    '\n' +
                    '1)  "wrong" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> Boolean’.\n'));
 
     throws(function() { S.ifElse(lt0, 'wrong'); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'ifElse :: Function -> Function -> Function -> a -> b\n' +
-                   '                      ^^^^^^^^\n' +
-                   '                         1\n' +
+                   'ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b\n' +
+                   '                            ^^^^^^^^\n' +
+                   '                               1\n' +
                    '\n' +
                    '1)  "wrong" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b’.\n'));
 
     throws(function() { S.ifElse(lt0, Math.abs, 'wrong'); },
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'ifElse :: Function -> Function -> Function -> a -> b\n' +
-                   '                                  ^^^^^^^^\n' +
-                   '                                     1\n' +
+                   'ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b\n' +
+                   '                                        ^^^^^^^^\n' +
+                   '                                           1\n' +
                    '\n' +
                    '1)  "wrong" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Function’.\n'));
+                   'The value at position 1 is not a member of ‘a -> b’.\n'));
   });
 
   it('applies the first function when the predicate returns true', function() {

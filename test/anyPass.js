@@ -19,13 +19,13 @@ describe('anyPass', function() {
            errorEq(TypeError,
                    'Invalid value\n' +
                    '\n' +
-                   'anyPass :: Array Function -> a -> Boolean\n' +
-                   '           ^^^^^^^^^^^^^^\n' +
-                   '                 1\n' +
+                   'anyPass :: Array (a -> Boolean) -> a -> Boolean\n' +
+                   '           ^^^^^^^^^^^^^^^^^^^^\n' +
+                   '                    1\n' +
                    '\n' +
                    '1)  "wrong" :: String\n' +
                    '\n' +
-                   'The value at position 1 is not a member of ‘Array Function’.\n'));
+                   'The value at position 1 is not a member of ‘Array (a -> Boolean)’.\n'));
   });
 
   it('returns false when given an empty array of predicates', function() {
