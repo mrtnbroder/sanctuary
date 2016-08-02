@@ -39,6 +39,35 @@ describe('Right', function() {
                    'The value at position 1 is not a member of ‘Either a b’.\n'));
   });
 
+  it('provides a "bimap" method', function() {
+    eq(S.Right(42).bimap.length, 2);
+    eq(S.Right(42).bimap(S.toUpper, S.inc), S.Right(43));
+
+    throws(function() { S.Right(42).bimap(null, null); },
+           errorEq(TypeError,
+                   'Invalid value\n' +
+                   '\n' +
+                   'Either#bimap :: Either a b -> Function -> Function -> Either c d\n' +
+                   '                              ^^^^^^^^\n' +
+                   '                                 1\n' +
+                   '\n' +
+                   '1)  null :: Null\n' +
+                   '\n' +
+                   'The value at position 1 is not a member of ‘Function’.\n'));
+
+    throws(function() { S.Right(42).bimap(S.toUpper, null); },
+           errorEq(TypeError,
+                   'Invalid value\n' +
+                   '\n' +
+                   'Either#bimap :: Either a b -> Function -> Function -> Either c d\n' +
+                   '                                          ^^^^^^^^\n' +
+                   '                                             1\n' +
+                   '\n' +
+                   '1)  null :: Null\n' +
+                   '\n' +
+                   'The value at position 1 is not a member of ‘Function’.\n'));
+  });
+
   it('provides a "chain" method', function() {
     eq(S.Right(25).chain.length, 1);
     eq(S.Right(25).chain(squareRoot), S.Right(5));
@@ -272,6 +301,21 @@ describe('Right', function() {
 
     // right identity
     assert(a.chain(a.of).equals(a));
+  });
+
+  it('implements Bifunctor', function() {
+    var f = S.concat('f');
+    var g = S.concat('g');
+    var h = S.mult(2);
+    var i = S.inc;
+
+    // identity
+    eq(S.Right(42).bimap(S.I, S.I), S.Right(42));
+
+    // composition
+    eq(S.Right(20).bimap(function(a) { return f(g(a)); },
+                         function(b) { return h(i(b)); }),
+       S.Right(20).bimap(g, i).bimap(f, h));
   });
 
 });

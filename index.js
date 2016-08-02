@@ -1462,7 +1462,7 @@
   //. value is of type `b`.
   //.
   //. The Either type satisfies the [Semigroup][], [Monad][], [Traversable][],
-  //. and [Extend][] specifications.
+  //. [Extend][], and [Bifunctor][] specifications.
 
   //# EitherType :: Type -> Type -> Type
   //.
@@ -1542,6 +1542,35 @@
          {},
          [$Either(a, $.Function), $Either(a, b), $Either(a, c)],
          function(ef, ex) { return ef.isRight ? ex.map(ef.value) : ef; });
+
+  //# Either#bimap :: Either a b ~> (a -> c) -> (b -> d) -> Either c d
+  //.
+  //. Takes two functions and returns:
+  //.
+  //.   - a Left whose value is the result of applying the first function
+  //.     to this Left's value if `this` is a Left; otherwise
+  //.
+  //.   - a Right whose value is the result of applying the second function
+  //.     to this Right's value.
+  //.
+  //. Similar to [`Either#map`](#Either.prototype.map), but supports mapping
+  //. over the left side as well as the right side.
+  //.
+  //. ```javascript
+  //. > Left('abc').bimap(S.toUpper, S.inc)
+  //. Left('ABC')
+  //.
+  //. > Right(42).bimap(S.toUpper, S.inc)
+  //. Right(43)
+  //. ```
+  Either.prototype.bimap =
+  method('Either#bimap',
+         {},
+         [$Either(a, b), $.Function, $.Function, $Either(c, d)],
+         function(either, f, g) {
+           return either.isLeft ? Left(f(either.value))
+                                : Right(g(either.value));
+         });
 
   //# Either#chain :: Either a b ~> (b -> Either a c) -> Either a c
   //.
@@ -3545,6 +3574,7 @@
 }));
 
 //. [Apply]:          https://github.com/fantasyland/fantasy-land#apply
+//. [Bifunctor]:      https://github.com/fantasyland/fantasy-land#bifunctor
 //. [BinaryType]:     https://github.com/sanctuary-js/sanctuary-def#binarytype
 //. [Extend]:         https://github.com/fantasyland/fantasy-land#extend
 //. [Foldable]:       https://github.com/fantasyland/fantasy-land#foldable
